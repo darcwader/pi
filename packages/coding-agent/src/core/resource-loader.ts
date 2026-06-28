@@ -17,6 +17,7 @@ import {
 } from "./extensions/loader.ts";
 import type { Extension, ExtensionFactory, ExtensionRuntime, LoadExtensionsResult } from "./extensions/types.ts";
 import { DefaultPackageManager, type PathMetadata, type ResolvedResource } from "./package-manager.ts";
+import { getProjectDirs } from "./project-dirs.ts";
 import type { PromptTemplate } from "./prompt-templates.ts";
 import { loadPromptTemplates } from "./prompt-templates.ts";
 import { SettingsManager } from "./settings-manager.ts";
@@ -86,7 +87,6 @@ export function loadProjectContextFiles(options: {
 	cwd: string;
 	agentDir: string;
 }): Array<{ path: string; content: string }> {
-	const resolvedCwd = resolvePath(options.cwd);
 	const resolvedAgentDir = resolvePath(options.agentDir);
 
 	const contextFiles: Array<{ path: string; content: string }> = [];
@@ -98,26 +98,13 @@ export function loadProjectContextFiles(options: {
 		seenPaths.add(globalContext.path);
 	}
 
-	const ancestorContextFiles: Array<{ path: string; content: string }> = [];
-
-	let currentDir = resolvedCwd;
-	const root = resolve("/");
-
-	while (true) {
-		const contextFile = loadContextFileFromDir(currentDir);
-		if (contextFile && !seenPaths.has(contextFile.path)) {
-			ancestorContextFiles.unshift(contextFile);
-			seenPaths.add(contextFile.path);
+	for (const dir of getProjectDirs(options.cwd, options.agentDir)) {
+		const projectContext = loadContextFileFromDir(dir);
+		if (projectContext && !seenPaths.has(projectContext.path)) {
+			contextFiles.push(projectContext);
+			seenPaths.add(projectContext.path);
 		}
-
-		if (currentDir === root) break;
-
-		const parentDir = resolve(currentDir, "..");
-		if (parentDir === currentDir) break;
-		currentDir = parentDir;
 	}
-
-	contextFiles.push(...ancestorContextFiles);
 
 	return contextFiles;
 }
