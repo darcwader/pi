@@ -23,6 +23,17 @@ To learn more about Pi:
 * [Visit pi.dev](https://pi.dev), the project website with demos
 * [Read the documentation](https://pi.dev/docs/latest), but you can also ask the agent to explain itself
 
+## Fork Changes
+
+> **This is a fork** — [darcwader/pi](https://github.com/darcwader/pi)
+
+This fork differs from upstream in how project context files (`CLAUDE.md`, `AGENTS.md`) and skills are loaded:
+
+- **Does not load from the project directory**: Upstream walks ancestor directories from `cwd` to root looking for `CLAUDE.md` / `AGENTS.md` files and `.pi/skills/` directories anywhere in the tree. This fork removes that traversal entirely — project-local files are ignored.
+- **Off-project directory instead**: Project context files and skills are loaded exclusively from `~/.pi/projects/<owner>/<repo>/` (resolved via `git remote` slug with a basename fallback). This keeps project configuration entirely outside the working tree.
+
+This means skills and context files are maintained separately from the project source, and configurations don't leak across nested or sibling directories.
+
 ## All Packages
 
 | Package | Description |
@@ -47,15 +58,6 @@ If you need stronger boundaries, containerize or sandbox Pi. See [packages/codin
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for contribution guidelines and [AGENTS.md](AGENTS.md) for project-specific rules (for both humans and agents).  Longer term plans for Pi can also be found in [RFCs](https://rfc.earendil.com/keyword/pi/).
-
-## Fork Changes
-
-This fork ([darcwader/pi](https://github.com/darcwader/pi)) differs from upstream in how project context files (`CLAUDE.md`, `AGENTS.md`) and skills are loaded:
-
-- **Does not load from the project directory**: Upstream walks ancestor directories from `cwd` to root looking for `CLAUDE.md` / `AGENTS.md` files and `.pi/skills/` directories anywhere in the tree. This fork removes that traversal entirely — project-local files are ignored.
-- **Off-project directory instead**: Project context files and skills are loaded exclusively from `~/.pi/projects/<owner>/<repo>/` (resolved via `git remote` slug with a basename fallback). This keeps project configuration entirely outside the working tree.
-
-This means skills and context files are maintained separately from the project source, and configurations don't leak across nested or sibling directories.
 
 ## Development
 
